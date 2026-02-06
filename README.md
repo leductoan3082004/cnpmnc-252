@@ -2,6 +2,22 @@
 
 A full-stack web application for managing student records with CRUD operations, built with Spring Boot, Thymeleaf, and PostgreSQL.
 
+---
+
+## Câu Hỏi và Trả Lời - 4 Labs
+
+> **Lưu ý:** Phần này chỉ tổng hợp các câu hỏi thực sự được đặt ra trong 4 bài Lab.
+
+### Lab 1: Khởi Tạo & Kiến Trúc Hệ Thống
+
+**Câu hỏi 1:** Cố tình Insert một sinh viên có id trùng với một người đã có sẵn. Quan sát thông báo lỗi: UNIQUE constraint failed. Tại sao Database lại chặn thao tác này?
+
+**Trả lời:** Database chặn vì khóa chính (Primary Key) phải duy nhất. Khóa chính đảm bảo mỗi bản ghi được định danh chính xác. Nếu có nhiều bản ghi cùng ID, các thao tác UPDATE hoặc DELETE theo ID sẽ không xác định được bản ghi nào, phá vỡ tính toàn vẹn dữ liệu (Data Integrity).
+
+**Câu hỏi 2:** Thử Insert một sinh viên nhưng bỏ trống cột name (để NULL). Database có báo lỗi không? Từ đó suy nghĩ xem sự thiếu chặt chẽ này ảnh hưởng gì khi code Java đọc dữ liệu lên?
+
+**Trả lời:** Database KHÔNG báo lỗi nếu cột name không có ràng buộc NOT NULL. Khi code Java đọc dữ liệu và gọi method trên name (như `getName().toUpperCase()`), sẽ gây NullPointerException. Sự thiếu chặt chẽ này dẫn đến lỗi runtime, khó debug và ảnh hưởng trải nghiệm người dùng. Nên thêm ràng buộc NOT NULL ngay từ đầu khi thiết kế database.
+
 ## Features
 
 - View list of all students with search functionality
