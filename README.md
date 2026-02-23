@@ -1,8 +1,8 @@
 # Student Management System
 
-A full-stack web application for managing student records built with Spring Boot, Thymeleaf, PostgreSQL, deployed using Docker with Nginx reverse proxy and automatic SSL/TLS certificates.
+A full-stack web application for managing student records, built with Spring Boot and Thymeleaf, backed by PostgreSQL, and deployed with Docker.
 
-**Live Demo:** [Update after deployment]
+**Live Demo:** https://student-management.haretaworkshop.com
 
 ## Team
 
@@ -13,6 +13,8 @@ A full-stack web application for managing student records built with Spring Boot
 **Course:** Advanced Software Engineering
 **Institution:** HCMC University of Technology
 **Instructor:** Dr. Thuan Le (thuanle@hcmut.edu.vn)
+
+---
 
 ## Lab Questions & Answers
 
@@ -70,171 +72,168 @@ A: Nginx provides:
 - Efficient static content serving
 - Security layer hiding backend servers
 
+---
+
 ## Overview
 
 ### Architecture
 
 ```
-Internet → Nginx (80/443) → Spring Boot (8080) → PostgreSQL (5432)
-                ↓
-           acme.sh (SSL)
+Internet
+   │
+   ▼
+nginx-proxy (port 80/443)   ← jwilder/nginx-proxy on the server,
+   │  + letsencrypt            shared by all deployments, auto SSL
+   │
+   ▼
+student-management-app (8080)
+   │
+   ▼
+student-management-db (5432, internal only)
 ```
 
-**Services:**
-- `nginx`: Reverse proxy with SSL termination
-- `acme`: SSL certificate management (Let's Encrypt)
-- `app`: Spring Boot application
-- `postgres`: PostgreSQL database
+**Docker services:**
 
-## Technologies
+| Service | Image | Role |
+|---|---|---|
+| `app` | Built from `Dockerfile` | Spring Boot application |
+| `student-postgres` | `postgres:16-alpine` | Database (internal network only) |
 
-- Java 23
-- Spring Boot 4.0.2
-- Spring Data JPA
-- Thymeleaf
-- PostgreSQL 16
-- Docker & Docker Compose
-- Nginx
-- Maven
+SSL and routing are handled by `jwilder/nginx-proxy` + `jrcs/letsencrypt-nginx-proxy-companion`, which already run on the server and are shared across all deployments.
 
-## Prerequisites
+### Tech Stack
 
-- Java 23+ and Maven (for local development)
-- Docker and Docker Compose (for deployment)
-- Domain name with DNS configured (for SSL)
+| Layer | Technology |
+|---|---|
+| Language | Java 23 |
+| Framework | Spring Boot 4.0.2 |
+| ORM | Spring Data JPA / Hibernate |
+| Templating | Thymeleaf |
+| Database | PostgreSQL 16 |
+| Build | Maven |
+| Containerisation | Docker & Docker Compose |
 
-## Setup and Deployment
+---
 
-### Local Development
+## Project Structure
+
+```
+student-management/
+├── src/
+│   └── main/java/vn/edu/hcmut/cse/adsoftweng/lab/
+│       ├── StudentManagementApplication.java
+│       ├── controller/
+│       │   ├── StudentController.java      # REST API  (/api/students)
+│       │   └── StudentWebController.java   # Web UI    (/students)
+│       ├── entity/
+│       │   └── Student.java               # id, name, email, age
+│       ├── repository/
+│       │   └── StudentRepository.java
+│       └── service/
+│           └── StudentService.java
+├── Dockerfile
+├── docker-compose.yml                     # Production config
+├── docker-compose.override.yml            # Local dev overrides (auto-loaded)
+├── init.sql                               # Seeds 5 sample students
+└── pom.xml
+```
+
+---
+
+## Running the App
+
+### Option 1 — Local with Docker (recommended)
+
+`docker-compose.override.yml` is automatically merged, so no extra flags needed. It creates a local network and exposes port 8080 directly.
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/student-management.git
+git clone https://github.com/leductoan3082004/cnpmnc-252.git student-management
 cd student-management
+docker compose up --build
+```
 
-# Configure database in application.properties
-nano src/main/resources/application.properties
+Access at `http://localhost:8080/students`
 
-# Build and run
-./mvnw clean package
+### Option 2 — Local without Docker
+
+Requires Java 23+, Maven, and a running PostgreSQL instance.
+
+```bash
+# Set env vars or edit src/main/resources/application.properties
+export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/student_management
+export SPRING_DATASOURCE_USERNAME=postgres
+export SPRING_DATASOURCE_PASSWORD=postgres123
+
 ./mvnw spring-boot:run
 ```
 
-Access at `http://localhost:8080`
+Access at `http://localhost:8080/students`
 
-### Using Docker Locally
+### Option 3 — Production server
 
-```bash
-docker-compose up -d
-docker-compose logs -f
-```
-
-Access at `http://localhost`
-
-### Production Deployment
-
-**Prerequisites:** Docker and Docker Compose installed on your server.
+The server must already be running `jwilder/nginx-proxy` and `jrcs/letsencrypt-nginx-proxy-companion` on a Docker network named `my-net`. The `docker-compose.override.yml` must **not** be present so the production config is used as-is.
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/student-management.git
+git clone https://github.com/leductoan3082004/cnpmnc-252.git student-management
 cd student-management
-cp .env.example .env
-nano .env
+docker compose up -d --build
 ```
 
-Update `.env`:
-```bash
-POSTGRES_DB=student_management
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_secure_password
-ACME_EMAIL=your-email@example.com
-```
+The proxy discovers the container via the `VIRTUAL_HOST` environment variable and issues an SSL certificate automatically.
 
-```bash
-docker-compose up -d
-docker-compose ps
-```
+---
 
-Your application is now running at `http://your-server-ip`
+## API Reference
 
-**Configure SSL (optional):**
+### REST API — `/api/students`
 
-Ensure your domain points to your server IP and ports 80/443 are open.
+| Method | Path | Description | Response |
+|---|---|---|---|
+| `GET` | `/api/students` | List all students | `Student[]` JSON |
+| `GET` | `/api/students/{id}` | Get one student | `Student` JSON |
 
-```bash
-./setup-ssl.sh yourdomain.com your-email@example.com
-```
-
-Your application is now accessible at `https://yourdomain.com`
-
-### Management Commands
-
-```bash
-# View logs
-docker-compose logs -f [service-name]
-
-# Restart services
-docker-compose restart
-
-# Update application
-git pull && docker-compose up -d --build app
-
-# Database backup
-docker-compose exec postgres pg_dump -U postgres student_management > backup.sql
-
-# Database restore
-docker-compose exec -T postgres psql -U postgres student_management < backup.sql
-```
-
-### Troubleshooting
-
-```bash
-# Check container status
-docker-compose ps
-docker-compose logs [service-name]
-
-# Test database connection
-docker-compose exec postgres pg_isready
-
-# Verify Nginx configuration
-docker-compose exec nginx nginx -t
-
-# Check port usage
-sudo lsof -i :80
-sudo lsof -i :443
-```
-
-## API Documentation
-
-### REST API Endpoints
-
-Base URL: `/api/students`
-
-**Get all students:**
-```
-GET /api/students
-```
-
-**Get student by ID:**
-```
-GET /api/students/{id}
-```
-
-**Response format:**
+**Student object:**
 ```json
 {
-  "id": "uuid",
+  "id": "7b6b6469-8792-4c88-a608-6e8da862f72c",
   "name": "Nguyen Van A",
   "email": "vana@example.com",
   "age": 20
 }
 ```
 
-### Web UI Endpoints
+### Web UI — `/students`
 
-- `GET /students` - List all students with search
-- `GET /students/new` - New student form
-- `GET /students/{id}` - View student details
-- `GET /students/{id}/edit` - Edit student form
-- `POST /students` - Create new student
-- `POST /students/{id}` - Update student
-- `POST /students/{id}/delete` - Delete student
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/students` | Student list (supports `?keyword=` search) |
+| `GET` | `/students/new` | Add student form |
+| `GET` | `/students/{id}` | Student detail page |
+| `GET` | `/students/{id}/edit` | Edit student form |
+| `POST` | `/students` | Create student → redirects to list |
+| `POST` | `/students/{id}` | Update student → redirects to list |
+| `POST` | `/students/{id}/delete` | Delete student → redirects to list |
+
+---
+
+## Management Commands
+
+```bash
+# Follow logs
+docker compose logs -f app
+
+# Restart app only
+docker compose restart app
+
+# Pull latest code and rebuild
+git pull && docker compose up -d --build app
+
+# Database backup
+docker compose exec student-postgres pg_dump -U postgres student_management > backup.sql
+
+# Database restore
+docker compose exec -T student-postgres psql -U postgres student_management < backup.sql
+
+# Check container status
+docker compose ps
+```
