@@ -102,14 +102,16 @@ Application starts at http://localhost:8080
 
 ```bash
 cd student-management
-docker-compose up --build
+docker compose up --build
 ```
 
-Application starts at http://localhost:8080 with sample data automatically loaded.
+`docker-compose.override.yml` is automatically picked up — it creates a local network and exposes port 8080. No extra configuration needed.
+
+Application starts at http://localhost:8080/students with sample data automatically loaded.
 
 **Stop the application:**
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ## Usage
