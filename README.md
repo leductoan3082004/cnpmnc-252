@@ -1,239 +1,196 @@
 # Student Management System
 
-A full-stack web application for managing student records, built with Spring Boot and Thymeleaf, backed by PostgreSQL, and deployed with Docker.
-
-**Live Demo:** https://student-management.haretaworkshop.com
-
-## Team
-
-**Group Members:**
-- Lê Đức Toàn - 2213526
-- Nguyễn Anh Lâm - [Student ID]
-
-**Course:** Advanced Software Engineering
-**Institution:** HCMC University of Technology
-**Instructor:** Dr. Thuan Le (thuanle@hcmut.edu.vn)
+A full-stack web application for managing student records with CRUD operations, built with Spring Boot, Thymeleaf, and PostgreSQL.
 
 ---
 
-## Lab Questions & Answers
+## Câu Hỏi và Trả Lời - 4 Labs
 
-### Lab 1: Initialization & Architecture
+> **Lưu ý:** Phần này chỉ tổng hợp các câu hỏi thực sự được đặt ra trong 4 bài Lab.
 
-**Q: Why does the database block duplicate ID inserts?**
+### Lab 1: Khởi Tạo & Kiến Trúc Hệ Thống
 
-A: The database enforces the Primary Key constraint, which requires uniqueness. This ensures data integrity by preventing ambiguous UPDATE or DELETE operations that could affect multiple records.
+**Câu hỏi 1:** Cố tình Insert một sinh viên có id trùng với một người đã có sẵn. Quan sát thông báo lỗi: UNIQUE constraint failed. Tại sao Database lại chặn thao tác này?
 
-**Q: What happens if the name column allows NULL values?**
+**Trả lời:** Database chặn vì khóa chính (Primary Key) phải duy nhất. Khóa chính đảm bảo mỗi bản ghi được định danh chính xác. Nếu có nhiều bản ghi cùng ID, các thao tác UPDATE hoặc DELETE theo ID sẽ không xác định được bản ghi nào, phá vỡ tính toàn vẹn dữ liệu (Data Integrity).
 
-A: Without a NOT NULL constraint, Java code calling methods on null names (e.g., `getName().toUpperCase()`) will throw NullPointerException. Constraints should be added at database design time to prevent runtime errors.
+**Câu hỏi 2:** Thử Insert một sinh viên nhưng bỏ trống cột name (để NULL). Database có báo lỗi không? Từ đó suy nghĩ xem sự thiếu chặt chẽ này ảnh hưởng gì khi code Java đọc dữ liệu lên?
 
-### Lab 2: Backend REST API
+**Trả lời:** Database KHÔNG báo lỗi nếu cột name không có ràng buộc NOT NULL. Khi code Java đọc dữ liệu và gọi method trên name (như `getName().toUpperCase()`), sẽ gây NullPointerException. Sự thiếu chặt chẽ này dẫn đến lỗi runtime, khó debug và ảnh hưởng trải nghiệm người dùng. Nên thêm ràng buộc NOT NULL ngay từ đầu khi thiết kế database.
 
-**Q: Why use Dependency Injection instead of `new`?**
+## Features
 
-A: Dependency Injection provides:
-- Loose coupling between components
-- Easier unit testing with mock objects
-- Centralized lifecycle management via Spring Container
-- Singleton pattern by default, reducing memory usage
+- View list of all students with search functionality
+- View detailed information for individual students
+- Add new students with auto-generated IDs
+- Update existing student information
+- Delete students with confirmation
+- Server-side rendering with Thymeleaf templates
+- RESTful API endpoints
 
-**Q: Difference between @RestController and @Controller?**
+## Technologies
 
-A:
-- `@Controller`: Returns views (HTML templates)
-- `@RestController`: Returns data (JSON/XML), automatically adds `@ResponseBody`
+- Java 23
+- Spring Boot 4.0.2
+- Spring Data JPA
+- Thymeleaf
+- PostgreSQL 16
+- Maven
+- Docker & Docker Compose
 
-### Lab 3: Frontend SSR
+## Prerequisites
 
-**Q: How to implement search by name?**
+### Option 1: Local Development
+- Java 23 or higher
+- Maven 3.6+
+- PostgreSQL 16+ installed and running
 
-A: Use Spring Data JPA Query Method:
-```java
-List<Student> findByNameContainingIgnoreCase(String keyword);
+### Option 2: Docker
+- Docker installed
+- Docker Compose installed
+
+## Setup Instructions
+
+### Option 1: Local Development
+
+#### 1. Install PostgreSQL
+
+**macOS:**
+```bash
+brew install postgresql@16
+brew services start postgresql@16
 ```
 
-### Lab 4: PostgreSQL & CRUD
-
-**Q: Why use .env files?**
-
-A: Environment files provide:
-- Security: Passwords are not committed to version control
-- Flexibility: Easy configuration per environment
-- Best practice: Follows 12-Factor App methodology
-
-### Lab 5: Docker & Deployment
-
-**Q: Why use Nginx reverse proxy?**
-
-A: Nginx provides:
-- SSL/TLS termination
-- Load balancing capabilities
-- Efficient static content serving
-- Security layer hiding backend servers
-
----
-
-## Overview
-
-### Architecture
-
-```
-Internet
-   │
-   ▼
-nginx-proxy (port 80/443)   ← jwilder/nginx-proxy on the server,
-   │  + letsencrypt            shared by all deployments, auto SSL
-   │
-   ▼
-student-management-app (8080)
-   │
-   ▼
-student-management-db (5432, internal only)
+**Ubuntu/Debian:**
+```bash
+sudo apt update
+sudo apt install postgresql-16
+sudo systemctl start postgresql
 ```
 
-**Docker services:**
+**Windows:**
+Download and install from [PostgreSQL official website](https://www.postgresql.org/download/windows/)
 
-| Service | Image | Role |
-|---|---|---|
-| `app` | Built from `Dockerfile` | Spring Boot application |
-| `student-postgres` | `postgres:16-alpine` | Database (internal network only) |
+#### 2. Create Database
 
-SSL and routing are handled by `jwilder/nginx-proxy` + `jrcs/letsencrypt-nginx-proxy-companion`, which already run on the server and are shared across all deployments.
+```bash
+psql -U postgres
+CREATE DATABASE student_management;
+\q
+```
 
-### Tech Stack
+#### 3. Configure Database Connection
 
-| Layer | Technology |
-|---|---|
-| Language | Java 23 |
-| Framework | Spring Boot 4.0.2 |
-| ORM | Spring Data JPA / Hibernate |
-| Templating | Thymeleaf |
-| Database | PostgreSQL 16 |
-| Build | Maven |
-| Containerisation | Docker & Docker Compose |
+Update `src/main/resources/application.properties` if needed:
 
----
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/student_management
+spring.datasource.username=postgres
+spring.datasource.password=your_password_here
+```
+
+#### 4. Run Application
+
+```bash
+cd student-management
+mvn spring-boot:run
+```
+
+Application starts at http://localhost:8080
+
+### Option 2: Docker
+
+```bash
+cd student-management
+docker-compose up --build
+```
+
+Application starts at http://localhost:8080 with sample data automatically loaded.
+
+**Stop the application:**
+```bash
+docker-compose down
+```
+
+## Usage
+
+### Web Interface
+
+- **Student List**: http://localhost:8080/students
+- **Student Details**: http://localhost:8080/students/{id}
+- **Add Student**: http://localhost:8080/students/new
+- **Edit Student**: http://localhost:8080/students/{id}/edit
+
+### REST API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/students` | Get all students |
+| GET | `/api/students/{id}` | Get student by ID |
+| POST | `/api/students` | Create new student |
+| PUT | `/api/students/{id}` | Update student |
+| DELETE | `/api/students/{id}` | Delete student |
+
+**Example:**
+```bash
+curl http://localhost:8080/api/students
+```
 
 ## Project Structure
 
 ```
 student-management/
-├── src/
-│   └── main/java/vn/edu/hcmut/cse/adsoftweng/lab/
-│       ├── StudentManagementApplication.java
-│       ├── controller/
-│       │   ├── StudentController.java      # REST API  (/api/students)
-│       │   └── StudentWebController.java   # Web UI    (/students)
-│       ├── entity/
-│       │   └── Student.java               # id, name, email, age
-│       ├── repository/
-│       │   └── StudentRepository.java
-│       └── service/
-│           └── StudentService.java
+├── src/main/
+│   ├── java/vn/edu/hcmut/cse/adsoftweng/lab/
+│   │   ├── controller/          # REST and Web controllers
+│   │   ├── entity/              # Student entity
+│   │   ├── repository/          # Data access layer
+│   │   └── service/             # Business logic
+│   └── resources/
+│       ├── templates/           # Thymeleaf HTML templates
+│       └── application.properties
 ├── Dockerfile
-├── docker-compose.yml                     # Production config
-├── docker-compose.override.yml            # Local dev overrides (auto-loaded)
-├── init.sql                               # Seeds 5 sample students
+├── docker-compose.yml
 └── pom.xml
 ```
 
----
+## Troubleshooting
 
-## Running the App
-
-### Option 1 — Local with Docker (recommended)
-
-`docker-compose.override.yml` is automatically merged, so no extra flags needed. It creates a local network and exposes port 8080 directly.
-
+### Port 8080 already in use
 ```bash
-git clone https://github.com/leductoan3082004/cnpmnc-252.git student-management
-cd student-management
-docker compose up --build
+lsof -i :8080
+kill -9 <PID>
 ```
 
-Access at `http://localhost:8080/students`
+### Port 5432 already in use (Docker)
+Stop local PostgreSQL or change port in `docker-compose.yml` to `5433:5432`
 
-### Option 2 — Local without Docker
-
-Requires Java 23+, Maven, and a running PostgreSQL instance.
-
+### Database connection failed
 ```bash
-# Set env vars or edit src/main/resources/application.properties
-export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/student_management
-export SPRING_DATASOURCE_USERNAME=postgres
-export SPRING_DATASOURCE_PASSWORD=postgres123
+# Check PostgreSQL is running
+pg_isready -U postgres
 
-./mvnw spring-boot:run
+# Docker: Check container status
+docker-compose ps
+docker logs student-management-db
 ```
 
-Access at `http://localhost:8080/students`
-
-### Option 3 — Production server
-
-The server must already be running `jwilder/nginx-proxy` and `jrcs/letsencrypt-nginx-proxy-companion` on a Docker network named `my-net`. The `docker-compose.override.yml` must **not** be present so the production config is used as-is.
-
+### View application logs (Docker)
 ```bash
-git clone https://github.com/leductoan3082004/cnpmnc-252.git student-management
-cd student-management
-docker compose up -d --build
+docker logs student-management-app -f
 ```
 
-The proxy discovers the container via the `VIRTUAL_HOST` environment variable and issues an SSL certificate automatically.
+## Database Schema
 
----
-
-## API Reference
-
-### REST API — `/api/students`
-
-| Method | Path | Description | Response |
-|---|---|---|---|
-| `GET` | `/api/students` | List all students | `Student[]` JSON |
-| `GET` | `/api/students/{id}` | Get one student | `Student` JSON |
-
-**Student object:**
-```json
-{
-  "id": "7b6b6469-8792-4c88-a608-6e8da862f72c",
-  "name": "Nguyen Van A",
-  "email": "vana@example.com",
-  "age": 20
-}
+```sql
+CREATE TABLE students (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    age INTEGER NOT NULL
+);
 ```
 
-### Web UI — `/students`
+## License
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/students` | Student list (supports `?keyword=` search) |
-| `GET` | `/students/new` | Add student form |
-| `GET` | `/students/{id}` | Student detail page |
-| `GET` | `/students/{id}/edit` | Edit student form |
-| `POST` | `/students` | Create student → redirects to list |
-| `POST` | `/students/{id}` | Update student → redirects to list |
-| `POST` | `/students/{id}/delete` | Delete student → redirects to list |
-
----
-
-## Management Commands
-
-```bash
-# Follow logs
-docker compose logs -f app
-
-# Restart app only
-docker compose restart app
-
-# Pull latest code and rebuild
-git pull && docker compose up -d --build app
-
-# Database backup
-docker compose exec student-postgres pg_dump -U postgres student_management > backup.sql
-
-# Database restore
-docker compose exec -T student-postgres psql -U postgres student_management < backup.sql
-
-# Check container status
-docker compose ps
-```
+Educational project for Advanced Software Engineering course at HCMUT.
