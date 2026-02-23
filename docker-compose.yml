@@ -8,8 +8,6 @@ services:
       POSTGRES_DB: student_management
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres123
-    ports:
-      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -20,6 +18,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   app:
     build:
@@ -31,17 +30,26 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres123
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-    ports:
-      - "8080:8080"
+      # Picked up by jwilder/nginx-proxy for automatic routing and SSL
+      VIRTUAL_HOST: student-management.haretaworkshop.com
+      VIRTUAL_PORT: "8080"
+      LETSENCRYPT_HOST: student-management.haretaworkshop.com
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - student-network
+      - proxy-network
+    restart: unless-stopped
 
 volumes:
   postgres-data:
 
 networks:
+  # Internal network: only app and its DB talk here
   student-network:
     driver: bridge
+  # Joins the existing nginx-proxy network so the proxy can discover this app
+  proxy-network:
+    external: true
+    name: my-net
