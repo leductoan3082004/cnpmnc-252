@@ -1,0 +1,11 @@
+services:
+  app:
+    ports:
+      - "8080:8080"
+
+# Override proxy-network to be a local bridge instead of the remote server's my-net
+networks:
+  proxy-network:
+    external: false
+    name: local-proxy-net
+    driver: bridge
