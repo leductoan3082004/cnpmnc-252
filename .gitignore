@@ -38,3 +38,20 @@ build/
 ### Docker ###
 *.log
 .docker/
+
+### SSL Certificates ###
+nginx/ssl/
+certbot/conf/
+certbot/www/
+*.pem
+*.key
+*.crt
+*.csr
+
+### Nginx ###
+nginx/conf.d/*.bak
+nginx/conf.d/*.tmp
+
+### Database ###
+*.db
+*.sqlite
