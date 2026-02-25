@@ -80,7 +80,7 @@ Hiển thị:
 
 ### Xóa Sinh Viên
 
-![Delete Confirm](src/images/delete-confirm.png)
+![Delete Confirm](src/images/delete.png)
 
 #### Sau khi xóa thành công
 
