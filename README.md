@@ -11,7 +11,7 @@ A full-stack web application for managing student records with CRUD operations, 
 | Lê Đức Toàn | 2213526  |
 | Nguyễn Anh Lâm | 2211795 |
 
-**URL của Web Service:**
+**URL của Web Service:** https://student-management.haretaworkshop.com/students
 
 ---
 
