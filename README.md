@@ -4,7 +4,18 @@ A full-stack web application for managing student records with CRUD operations, 
 
 ---
 
-## Câu Hỏi và Trả Lời - 4 Labs
+## Sinh viên thực hiện
+
+| Sinh viên | MSSV |
+|-------|-------|
+| Lê Đức Toàn | 2213526  |
+| Nguyễn Anh Lâm | 2211795 |
+
+**URL của Web Service:**
+
+---
+
+## Câu Hỏi và Trả Lời
 
 > **Lưu ý:** Phần này chỉ tổng hợp các câu hỏi thực sự được đặt ra trong 4 bài Lab.
 
@@ -17,6 +28,65 @@ A full-stack web application for managing student records with CRUD operations, 
 **Câu hỏi 2:** Thử Insert một sinh viên nhưng bỏ trống cột name (để NULL). Database có báo lỗi không? Từ đó suy nghĩ xem sự thiếu chặt chẽ này ảnh hưởng gì khi code Java đọc dữ liệu lên?
 
 **Trả lời:** Database KHÔNG báo lỗi nếu cột name không có ràng buộc NOT NULL. Khi code Java đọc dữ liệu và gọi method trên name (như `getName().toUpperCase()`), sẽ gây NullPointerException. Sự thiếu chặt chẽ này dẫn đến lỗi runtime, khó debug và ảnh hưởng trải nghiệm người dùng. Nên thêm ràng buộc NOT NULL ngay từ đầu khi thiết kế database.
+
+---
+
+## Demo Screenshots
+
+### Trang Danh Sách Sinh Viên
+
+- Hiển thị danh sách sinh viên
+- Ô tìm kiếm theo tên
+- Nút Thêm Mới
+- Nút Xem Chi Tiết
+
+![List View](src/images/list-view.png)
+
+### Tìm Kiếm Sinh Viên
+
+![Search](src/images/search.png)
+
+### Thêm Mới Sinh Viên
+
+#### Form tạo sinh viên
+
+![Create Form](src/images/create-form.png)
+
+#### Sau khi lưu thành công
+
+![Create Success](src/images/create-success.png)
+
+### Trang Chi Tiết
+
+Hiển thị:
+- ID
+- Name
+- Email
+- Age
+- Nút Chỉnh Sửa
+- Nút Xóa
+
+![Detail View](src/images/detail-view.png)
+
+### Chỉnh Sửa Sinh Viên
+
+#### Form có dữ liệu cũ
+
+![Edit Form](src/images/edit-form.png)
+
+#### Sau khi cập nhật
+
+![Edit Success](src/images/edit-success.png.png)
+
+### Xóa Sinh Viên
+
+![Delete Confirm](src/images/delete-confirm.png)
+
+#### Sau khi xóa thành công
+
+![Delete Success](src/images/delete-success.png)
+
+---
 
 ## Features
 

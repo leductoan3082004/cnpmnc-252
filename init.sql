@@ -6,9 +6,16 @@ CREATE TABLE IF NOT EXISTS students (
 );
 
 INSERT INTO students (id, name, email, age) VALUES
-    ('1', 'John Doe', 'john.doe@example.com', 20),
-    ('2', 'Jane Smith', 'jane.smith@example.com', 22),
-    ('3', 'Michael Johnson', 'michael.johnson@example.com', 21),
-    ('4', 'Emily Davis', 'emily.davis@example.com', 23),
-    ('5', 'David Wilson', 'david.wilson@example.com', 19)
+    (1, 'Nguyen Van A', 'vana@example.com', 20),
+    (2, 'Tran Thi B', 'thib@example.com', 21),
+    (3, 'Le Van C', 'vanc@example.com', 22),
+    (4, 'Pham Thi D', 'thid@example.com', 20),
+    (5, 'Hoang Van E', 'vane@example.com', 23),
+    (6, 'Do Thi F', 'thif@example.com', 17),
+    (7, 'Bui Van G', 'vang@example.com', 24),
+    (8, 'Dang Thi H', 'thih@example.com', 22),
+    (9, 'Ngo Van I', 'vani@example.com', 20),
+    (10, 'Vu Thi K', 'thik@example.com', 16),
+    (11, 'Phan Van L', 'vanl@example.com', 21),
+    (12, 'Truong Thi M', 'thim@example.com', 22)
 ON CONFLICT (id) DO NOTHING;
